@@ -12,13 +12,15 @@ Steps:
 
 Example:
 
-To GET a product with productId : 13860428:
+To GET a product with productId "13860428"
+
 curl -X GET \
   http://localhost:9800/products/13860428 \
   -H 'Postman-Token: b45a37d3-b07b-4fbc-b704-97bbe6f845c7' \
   -H 'cache-control: no-cache'
 
 To add a product:
+
 curl -X POST \
   http://localhost:9800/products/1234 \
   -H 'Content-Type: application/json' \
