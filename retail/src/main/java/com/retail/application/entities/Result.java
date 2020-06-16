@@ -19,7 +19,6 @@ public class Result {
   @JsonProperty("product")
   private Product product;
 
-
   public Product getProduct() {
     return product;
   }

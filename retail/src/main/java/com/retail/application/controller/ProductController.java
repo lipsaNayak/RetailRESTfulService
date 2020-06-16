@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -52,17 +53,26 @@ public class ProductController {
     return productRepository.save(retailProduct);
   }
 
+
   @RequestMapping(value = "/{productId}", produces = "application/json", method = RequestMethod.GET)
-  public RetailProduct findById(@PathVariable(value = "productId") Integer productId){
+  public RetailProduct findById(@PathVariable(value = "productId") Integer productId)
+      throws Exception {
+
     RetailProduct retailProduct = productRepository.findOne(productId);
     if(retailProduct == null) {
       log.info("No such product found in the database!");
-      retailProduct = productDAL.getProductById(productId);
+      try {
+        retailProduct = productDAL.getProductById(productId);
+      } catch (ValidationException e) {
+        log.error("Validation exception: {}", e.getExceptionMessage());
+        throw new Exception(e.getExceptionMessage());
+      }
     } else {
       log.info("Found product in the database!");
     }
     log.info("The Product: {} with ProductId : {} ", retailProduct.toString(), productId);
     return retailProduct;
+
   }
 
 }

@@ -3,6 +3,7 @@ package com.retail.application.dataccess;
 import com.retail.application.entities.Item;
 import com.retail.application.entities.Result;
 import com.retail.application.entities.RetailProduct;
+import com.retail.application.exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class ProductDALImpl implements ProductDAL{
   /* This method is invoked when no product with the given productId exists.
   * */
   @Override
-  public RetailProduct getProductById(Integer productId) {
+  public RetailProduct getProductById(Integer productId) throws ValidationException {
+
     //Fetch the deafult product i:e, product with id 0
     RetailProduct retailProduct = productRepository.findOne(0);
     log.info("Default product fetched from the database is : {}", retailProduct.toString());
@@ -44,18 +46,25 @@ public class ProductDALImpl implements ProductDAL{
     retailProduct = createNewProductWithDefaultPrice(retailProduct);
     //Return this new formed customized product.
     return retailProduct;
+
   }
 
   //The product details is fetched from an external API i:e redsky.target.com.
   //The details of the product is collected and a new RetailProduct is created.
-  private RetailProduct createNewProductWithDefaultPrice(RetailProduct defaultRetailProduct){
+  private RetailProduct createNewProductWithDefaultPrice(RetailProduct defaultRetailProduct)
+      throws ValidationException {
 
     ResponseEntity<Result> response
         = restTemplate.getForEntity(redskyTargetURL , Result.class, defaultRetailProduct.getId());
     Result result = response.getBody();
     Item item = result.getProduct().getItem();
+    if(result == null || item == null){
+      throw new ValidationException("Product with productId " + defaultRetailProduct.getId() + "does not exist" );
+    }
     log.info("Product fetched from the external source has id as : {} and name as : {}", item.getTcin(), item.getProductDescription().getTitle());
     defaultRetailProduct.setName(item.getProductDescription().getTitle());
     return defaultRetailProduct;
+
   }
+
 }
